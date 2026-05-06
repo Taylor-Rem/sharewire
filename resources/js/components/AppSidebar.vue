@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid, Library, Upload } from 'lucide-vue-next';
+import { BookOpen, FolderGit2, Headphones, LayoutGrid, Library, Upload } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -14,6 +14,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { index as myLibraryRoute } from '@/routes/library';
 import { dashboard } from '@/routes';
 import { create as uploadSongRoute, index as sharedLibraryRoute } from '@/routes/songs';
 import type { NavItem } from '@/types';
@@ -23,6 +24,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'My library',
+        href: myLibraryRoute(),
+        icon: Headphones,
     },
     {
         title: 'Shared library',

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowRight, Library, Upload } from 'lucide-vue-next';
+import { ArrowRight, Headphones, Library, Upload } from 'lucide-vue-next';
 import type { Component } from 'vue';
 import {
     Card,
@@ -9,6 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { index as myLibraryRoute } from '@/routes/library';
 import { dashboard } from '@/routes';
 import { create as uploadSongRoute, index as sharedLibraryRoute } from '@/routes/songs';
 
@@ -31,6 +32,12 @@ defineOptions({
 });
 
 const cards: DashboardCard[] = [
+    {
+        title: 'My library',
+        description: 'Listen to the songs you\'ve added. The player follows you across the app.',
+        href: myLibraryRoute(),
+        icon: Headphones,
+    },
     {
         title: 'Shared library',
         description: 'Browse every song uploaded to Sharewire and add tracks to your personal library.',

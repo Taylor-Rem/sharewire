@@ -1,13 +1,26 @@
 <script setup lang="ts">
 import { Form, Head, Link, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
-import { Check, Disc3, Plus } from 'lucide-vue-next';
+import { Check, Disc3, Plus, Trash2 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import LibraryEntryController from '@/actions/App/Http/Controllers/LibraryEntryController';
+import SongController from '@/actions/App/Http/Controllers/SongController';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { index as songsIndexRoute } from '@/routes/songs';
 
 type Uploader = {
@@ -26,6 +39,7 @@ type SongRow = {
     uploader: Uploader;
     is_in_my_library: boolean;
     is_uploader: boolean;
+    audio_url: string;
     created_at: string | null;
 };
 
@@ -49,7 +63,7 @@ type Paginator<T> = {
 
 type Props = {
     songs: Paginator<SongRow>;
-    filters: { q: string };
+    filters: { q: string; mine: boolean };
 };
 
 const props = defineProps<Props>();
@@ -66,16 +80,25 @@ defineOptions({
 });
 
 const q = ref<string>(props.filters.q ?? '');
+const mineOnly = ref<boolean>(props.filters.mine ?? false);
 
-const submitSearch = useDebounceFn((value: string): void => {
+const visit = (params: { q?: string; mine?: boolean }): void => {
     router.get(
         songsIndexRoute().url,
-        { q: value || undefined },
+        {
+            q: params.q || undefined,
+            mine: params.mine ? 1 : undefined,
+        },
         { preserveState: true, preserveScroll: true, replace: true },
     );
+};
+
+const submitSearch = useDebounceFn((value: string): void => {
+    visit({ q: value, mine: mineOnly.value });
 }, 300);
 
 watch(q, (value) => submitSearch(value));
+watch(mineOnly, (value) => visit({ q: q.value, mine: value }));
 
 const formatDuration = (seconds: number | null): string => {
     if (seconds === null || seconds <= 0) return '—';
@@ -96,7 +119,7 @@ const formatDuration = (seconds: number | null): string => {
             description="Every song uploaded to Sharewire. Add anything you like to your personal library."
         />
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-4">
             <Input
                 v-model="q"
                 type="search"
@@ -105,6 +128,14 @@ const formatDuration = (seconds: number | null): string => {
                 class="max-w-md"
                 data-test="shared-library-search"
             />
+            <div class="flex items-center gap-2">
+                <Checkbox
+                    id="mine-only"
+                    v-model="mineOnly"
+                    data-test="mine-only-toggle"
+                />
+                <Label for="mine-only" class="cursor-pointer">My uploads only</Label>
+            </div>
             <span class="text-sm text-muted-foreground">
                 {{ props.songs.meta.total }} {{ props.songs.meta.total === 1 ? 'song' : 'songs' }}
             </span>
@@ -116,7 +147,9 @@ const formatDuration = (seconds: number | null): string => {
         >
             <Disc3 class="size-10 text-muted-foreground" />
             <p class="text-sm text-muted-foreground">
-                {{ props.filters.q ? 'No songs match your search.' : 'No songs have been uploaded yet.' }}
+                <template v-if="props.filters.q">No songs match your search.</template>
+                <template v-else-if="props.filters.mine">You haven't uploaded any songs yet.</template>
+                <template v-else>No songs have been uploaded yet.</template>
             </p>
         </div>
 
@@ -130,7 +163,7 @@ const formatDuration = (seconds: number | null): string => {
                         <th class="px-4 py-3 font-medium">Genre</th>
                         <th class="px-4 py-3 font-medium">Duration</th>
                         <th class="px-4 py-3 font-medium">Uploader</th>
-                        <th class="px-4 py-3 text-right font-medium">Action</th>
+                        <th class="px-4 py-3 text-right font-medium">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -152,32 +185,77 @@ const formatDuration = (seconds: number | null): string => {
                         </td>
                         <td class="px-4 py-3 text-muted-foreground">{{ song.uploader.name ?? '—' }}</td>
                         <td class="px-4 py-3 text-right">
-                            <Button
-                                v-if="song.is_in_my_library"
-                                variant="outline"
-                                size="sm"
-                                disabled
-                            >
-                                <Check class="size-4" />
-                                In library
-                            </Button>
-                            <Form
-                                v-else
-                                v-bind="LibraryEntryController.store.form({ song: song.id })"
-                                :options="{ preserveScroll: true }"
-                                #default="{ processing }"
-                            >
+                            <div class="flex items-center justify-end gap-2">
                                 <Button
-                                    type="submit"
+                                    v-if="song.is_in_my_library"
+                                    variant="outline"
                                     size="sm"
-                                    variant="default"
-                                    :disabled="processing"
-                                    :data-test="`add-song-${song.id}`"
+                                    disabled
                                 >
-                                    <Plus class="size-4" />
-                                    Add
+                                    <Check class="size-4" />
+                                    In library
                                 </Button>
-                            </Form>
+                                <Form
+                                    v-else
+                                    v-bind="LibraryEntryController.store.form({ song: song.id })"
+                                    :options="{ preserveScroll: true }"
+                                    #default="{ processing }"
+                                >
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        variant="default"
+                                        :disabled="processing"
+                                        :data-test="`add-song-${song.id}`"
+                                    >
+                                        <Plus class="size-4" />
+                                        Add
+                                    </Button>
+                                </Form>
+
+                                <Dialog v-if="song.is_uploader">
+                                    <DialogTrigger as-child>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            :data-test="`delete-song-${song.id}`"
+                                        >
+                                            <Trash2 class="size-4" />
+                                            Delete
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Delete "{{ song.title }}"?</DialogTitle>
+                                            <DialogDescription>
+                                                This permanently removes the upload from the shared library and from
+                                                every other user's personal library. The audio file is deleted from
+                                                disk. This cannot be undone.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter>
+                                            <DialogClose as-child>
+                                                <Button variant="secondary">Cancel</Button>
+                                            </DialogClose>
+                                            <Form
+                                                v-bind="SongController.destroy.form({ song: song.id })"
+                                                :options="{ preserveScroll: true }"
+                                                #default="{ processing }"
+                                            >
+                                                <Button
+                                                    type="submit"
+                                                    variant="destructive"
+                                                    :disabled="processing"
+                                                    :data-test="`confirm-delete-song-${song.id}`"
+                                                >
+                                                    <Trash2 class="size-4" />
+                                                    Delete song
+                                                </Button>
+                                            </Form>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

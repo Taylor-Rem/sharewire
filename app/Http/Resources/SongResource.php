@@ -32,6 +32,8 @@ class SongResource extends JsonResource
             ],
             'is_in_my_library' => (bool) ($this->is_in_my_library ?? false),
             'is_uploader' => $request->user()?->id === $this->uploaded_by_user_id,
+            'audio_url' => route('songs.audio', ['song' => $this->id]),
+            'pivot' => $this->pivot ? ['id' => (int) $this->pivot->id] : null,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

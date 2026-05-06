@@ -19,6 +19,7 @@ class SongController extends Controller
     public function index(Request $request): Response
     {
         $q = trim((string) $request->query('q', ''));
+        $mineOnly = $request->boolean('mine');
 
         $libraryIds = $request->user()->library()->pluck('songs.id')->all();
 
@@ -33,6 +34,7 @@ class SongController extends Controller
                         ->orWhere('genre', 'like', $like);
                 });
             })
+            ->when($mineOnly, fn ($query) => $query->where('uploaded_by_user_id', $request->user()->id))
             ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
@@ -43,7 +45,10 @@ class SongController extends Controller
 
         return Inertia::render('Songs/Index', [
             'songs' => SongResource::collection($songs),
-            'filters' => ['q' => $q],
+            'filters' => [
+                'q' => $q,
+                'mine' => $mineOnly,
+            ],
         ]);
     }
 
@@ -62,5 +67,20 @@ class SongController extends Controller
         ]);
 
         return to_route('dashboard');
+    }
+
+    public function destroy(Request $request, Song $song): RedirectResponse
+    {
+        $this->authorize('delete', $song);
+
+        $title = $song->title;
+        $song->delete();
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => "Deleted \"{$title}\".",
+        ]);
+
+        return back();
     }
 }

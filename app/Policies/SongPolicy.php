@@ -34,6 +34,19 @@ class SongPolicy
         return $user->id === $song->uploaded_by_user_id;
     }
 
+    /**
+     * Whether the user can stream the song's audio. The uploader can always
+     * play their own upload; everyone else needs the song in their library.
+     */
+    public function play(User $user, Song $song): bool
+    {
+        if ($user->id === $song->uploaded_by_user_id) {
+            return true;
+        }
+
+        return $user->library()->where('songs.id', $song->id)->exists();
+    }
+
     public function restore(User $user, Song $song): bool
     {
         return false;

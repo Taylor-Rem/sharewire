@@ -48,7 +48,7 @@ class Song extends Model
     {
         return $this->belongsToMany(User::class, 'library_entries')
             ->using(LibraryEntry::class)
-            ->withPivot(['position', 'added_at'])
+            ->withPivot(['id', 'position', 'added_at'])
             ->withTimestamps();
     }
 }

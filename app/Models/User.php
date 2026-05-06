@@ -43,7 +43,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Song::class, 'library_entries')
             ->using(LibraryEntry::class)
-            ->withPivot(['position', 'added_at'])
+            ->withPivot(['id', 'position', 'added_at'])
             ->withTimestamps();
     }
 }
