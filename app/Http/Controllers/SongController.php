@@ -20,35 +20,20 @@ class SongController extends Controller
     {
         $q = trim((string) $request->query('q', ''));
         $mineOnly = $request->boolean('mine');
-
-        $libraryIds = $request->user()->library()->pluck('songs.id')->all();
+        $user = $request->user();
 
         $songs = Song::query()
             ->with('uploader:id,name')
-            ->when($q !== '', function ($query) use ($q): void {
-                $query->where(function ($inner) use ($q): void {
-                    $like = '%'.str_replace('%', '\\%', $q).'%';
-                    $inner->where('title', 'like', $like)
-                        ->orWhere('artist', 'like', $like)
-                        ->orWhere('album', 'like', $like)
-                        ->orWhere('genre', 'like', $like);
-                });
-            })
-            ->when($mineOnly, fn ($query) => $query->where('uploaded_by_user_id', $request->user()->id))
+            ->withCount(['inLibrariesOf as is_in_my_library_count' => fn ($query) => $query->where('users.id', $user->id)])
+            ->search($q)
+            ->when($mineOnly, fn ($query) => $query->where('uploaded_by_user_id', $user->id))
             ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
 
-        $songs->getCollection()->each(function (Song $song) use ($libraryIds): void {
-            $song->setAttribute('is_in_my_library', in_array($song->id, $libraryIds, true));
-        });
-
         return Inertia::render('Songs/Index', [
             'songs' => SongResource::collection($songs),
-            'filters' => [
-                'q' => $q,
-                'mine' => $mineOnly,
-            ],
+            'filters' => ['q' => $q, 'mine' => $mineOnly],
         ]);
     }
 

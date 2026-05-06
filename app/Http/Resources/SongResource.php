@@ -30,7 +30,7 @@ class SongResource extends JsonResource
                 'id' => $this->uploaded_by_user_id,
                 'name' => $this->whenLoaded('uploader', fn () => $this->uploader?->name),
             ],
-            'is_in_my_library' => (bool) ($this->is_in_my_library ?? false),
+            'is_in_my_library' => (bool) ($this->is_in_my_library ?? $this->is_in_my_library_count ?? false),
             'is_uploader' => $request->user()?->id === $this->uploaded_by_user_id,
             'audio_url' => route('songs.audio', ['song' => $this->id]),
             'pivot' => $this->pivot ? ['id' => (int) $this->pivot->id] : null,
