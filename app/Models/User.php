@@ -7,6 +7,8 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -30,5 +32,18 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    public function uploadedSongs(): HasMany
+    {
+        return $this->hasMany(Song::class, 'uploaded_by_user_id');
+    }
+
+    public function library(): BelongsToMany
+    {
+        return $this->belongsToMany(Song::class, 'library_entries')
+            ->using(LibraryEntry::class)
+            ->withPivot(['position', 'added_at'])
+            ->withTimestamps();
     }
 }

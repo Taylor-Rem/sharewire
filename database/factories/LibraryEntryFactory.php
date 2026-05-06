@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories;
+
+use App\Models\LibraryEntry;
+use App\Models\Song;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<LibraryEntry>
+ */
+class LibraryEntryFactory extends Factory
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'user_id' => User::factory(),
+            'song_id' => Song::factory(),
+            'position' => null,
+            'added_at' => now(),
+        ];
+    }
+}

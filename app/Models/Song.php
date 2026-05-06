@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable([
     'title',
@@ -41,5 +42,13 @@ class Song extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by_user_id');
+    }
+
+    public function inLibrariesOf(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'library_entries')
+            ->using(LibraryEntry::class)
+            ->withPivot(['position', 'added_at'])
+            ->withTimestamps();
     }
 }
