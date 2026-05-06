@@ -98,7 +98,7 @@ const onFileChange = (event: Event): void => {
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="audio">Audio file <span class="text-muted-foreground">(MP3, max 50 MB)</span></Label>
+                    <Label for="audio">Audio file <span class="text-muted-foreground">(MP3, max 100 MB)</span></Label>
                     <Input
                         id="audio"
                         name="audio"

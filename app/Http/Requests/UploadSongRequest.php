@@ -30,7 +30,7 @@ class UploadSongRequest extends FormRequest
                 'file',
                 'mimes:mp3',
                 'mimetypes:audio/mpeg',
-                'max:51200', // 50 MB
+                'max:102400', // 100 MB (matches PHP/nginx limits in deployment)
             ],
         ];
     }

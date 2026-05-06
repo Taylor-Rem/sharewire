@@ -82,13 +82,13 @@ it('rejects non-MP3 uploads', function (): void {
     expect(Song::count())->toBe(0);
 });
 
-it('rejects files larger than 50 MB', function (): void {
+it('rejects files larger than the 100 MB cap', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post('/songs', [
         'title' => 'Hello',
         'artist' => 'Artist',
-        'audio' => UploadedFile::fake()->create('big.mp3', 60_000, 'audio/mpeg'),
+        'audio' => UploadedFile::fake()->create('big.mp3', 110_000, 'audio/mpeg'),
     ]);
 
     $response->assertSessionHasErrors('audio');
