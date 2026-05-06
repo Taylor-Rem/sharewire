@@ -40,6 +40,10 @@ it('stores the song and redirects on a valid upload', function (): void {
     ]);
 
     $response->assertRedirect(route('dashboard'));
+    $response->assertInertiaFlash('toast', [
+        'type' => 'success',
+        'message' => 'Uploaded "Hello World".',
+    ]);
 
     expect(Song::count())->toBe(1);
     $song = Song::first();

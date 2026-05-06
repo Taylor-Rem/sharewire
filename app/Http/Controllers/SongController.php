@@ -22,6 +22,11 @@ class SongController extends Controller
     {
         $song = $upload(UploadSongData::fromRequest($request));
 
-        return to_route('dashboard')->with('status', "Uploaded \"{$song->title}\".");
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => "Uploaded \"{$song->title}\".",
+        ]);
+
+        return to_route('dashboard');
     }
 }
