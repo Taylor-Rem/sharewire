@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<LibraryEntry>
+ * @extends Factory<PlaylistSong>
  */
-class LibraryEntryFactory extends Factory
+class PlaylistSongFactory extends Factory
 {
     /**
      * @return array<string, mixed>

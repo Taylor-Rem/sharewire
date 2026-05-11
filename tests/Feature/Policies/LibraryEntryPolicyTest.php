@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\User;
 use App\Policies\LibraryEntryPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,7 +13,7 @@ beforeEach(function (): void {
     $this->policy = new LibraryEntryPolicy;
     $this->owner = User::factory()->create();
     $this->stranger = User::factory()->create();
-    $this->entry = LibraryEntry::factory()->create(['user_id' => $this->owner->id]);
+    $this->entry = PlaylistSong::factory()->create(['user_id' => $this->owner->id]);
 });
 
 it('lets the owner view their entry', function (): void {

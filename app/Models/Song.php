@@ -48,7 +48,7 @@ class Song extends Model
     public function inLibrariesOf(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'library_entries')
-            ->using(LibraryEntry::class)
+            ->using(PlaylistSong::class)
             ->withPivot(['id', 'position', 'added_at'])
             ->withTimestamps();
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,8 +20,8 @@ it('renders the personal library page with only the users own entries', function
     $mySong = Song::factory()->create(['title' => 'Mine']);
     $otherSong = Song::factory()->create(['title' => 'Theirs']);
 
-    LibraryEntry::factory()->create(['user_id' => $user->id, 'song_id' => $mySong->id]);
-    LibraryEntry::factory()->create(['user_id' => $other->id, 'song_id' => $otherSong->id]);
+    PlaylistSong::factory()->create(['user_id' => $user->id, 'song_id' => $mySong->id]);
+    PlaylistSong::factory()->create(['user_id' => $other->id, 'song_id' => $otherSong->id]);
 
     $response = $this->actingAs($user)->get(route('library.index'));
 
@@ -40,12 +40,12 @@ it('returns the songs ordered by added_at desc', function (): void {
     $first = Song::factory()->create();
     $second = Song::factory()->create();
 
-    LibraryEntry::factory()->create([
+    PlaylistSong::factory()->create([
         'user_id' => $user->id,
         'song_id' => $first->id,
         'added_at' => now()->subDay(),
     ]);
-    LibraryEntry::factory()->create([
+    PlaylistSong::factory()->create([
         'user_id' => $user->id,
         'song_id' => $second->id,
         'added_at' => now(),
@@ -63,7 +63,7 @@ it('paginates 20 per page', function (): void {
     $user = User::factory()->create();
     $songs = Song::factory()->count(25)->create();
     foreach ($songs as $song) {
-        LibraryEntry::factory()->create(['user_id' => $user->id, 'song_id' => $song->id]);
+        PlaylistSong::factory()->create(['user_id' => $user->id, 'song_id' => $song->id]);
     }
 
     $response = $this->actingAs($user)->get(route('library.index'));
@@ -78,7 +78,7 @@ it('eager-loads the uploader to avoid N+1', function (): void {
     $user = User::factory()->create();
     $uploader = User::factory()->create(['name' => 'Some Uploader']);
     $song = Song::factory()->for($uploader, 'uploader')->create();
-    LibraryEntry::factory()->create(['user_id' => $user->id, 'song_id' => $song->id]);
+    PlaylistSong::factory()->create(['user_id' => $user->id, 'song_id' => $song->id]);
 
     $response = $this->actingAs($user)->get(route('library.index'));
 

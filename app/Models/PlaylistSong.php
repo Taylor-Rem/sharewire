@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Database\Factories\LibraryEntryFactory;
+use Database\Factories\PlaylistSongFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,14 +16,14 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
     'position',
     'added_at',
 ])]
-class LibraryEntry extends Pivot
+class PlaylistSong extends Pivot
 {
-    /** @use HasFactory<LibraryEntryFactory> */
+    /** @use HasFactory<PlaylistSongFactory> */
     use HasFactory;
 
     public $incrementing = true;
 
-    protected $table = 'library_entries';
+    protected $table = 'playlist_song';
 
     /**
      * @return array<string, string>
@@ -45,4 +45,5 @@ class LibraryEntry extends Pivot
     {
         return $this->belongsTo(Song::class);
     }
+
 }

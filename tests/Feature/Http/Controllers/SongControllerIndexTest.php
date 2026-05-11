@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
@@ -88,7 +88,7 @@ it('reflects whether each song is in the current users library', function (): vo
     $inLibrary = Song::factory()->create();
     $notInLibrary = Song::factory()->create();
 
-    LibraryEntry::factory()->create([
+    PlaylistSong::factory()->create([
         'user_id' => $user->id,
         'song_id' => $inLibrary->id,
     ]);

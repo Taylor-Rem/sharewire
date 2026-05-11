@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 
 final class RemoveSongFromLibrary
 {
-    public function __invoke(LibraryEntry $entry): void
+    public function __invoke(PlaylistSong $entry): void
     {
         $entry->delete();
     }

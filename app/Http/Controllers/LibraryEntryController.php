@@ -8,7 +8,7 @@ use App\Actions\AddSongToLibrary;
 use App\Actions\RemoveSongFromLibrary;
 use App\Http\Requests\AddSongToLibraryRequest;
 use App\Http\Resources\SongResource;
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,7 +50,7 @@ class LibraryEntryController extends Controller
     }
 
     public function destroy(
-        LibraryEntry $libraryEntry,
+        PlaylistSong $libraryEntry,
         RemoveSongFromLibrary $removeSongFromLibrary,
     ): RedirectResponse {
         $this->authorize('delete', $libraryEntry);

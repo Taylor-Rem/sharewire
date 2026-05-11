@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,8 +46,8 @@ it('exposes the users who have it in their library', function (): void {
     $userA = User::factory()->create();
     $userB = User::factory()->create();
 
-    LibraryEntry::factory()->create(['song_id' => $song->id, 'user_id' => $userA->id]);
-    LibraryEntry::factory()->create(['song_id' => $song->id, 'user_id' => $userB->id]);
+    PlaylistSong::factory()->create(['song_id' => $song->id, 'user_id' => $userA->id]);
+    PlaylistSong::factory()->create(['song_id' => $song->id, 'user_id' => $userB->id]);
 
     expect($song->inLibrariesOf)->toHaveCount(2)
         ->and($song->inLibrariesOf->pluck('id')->all())

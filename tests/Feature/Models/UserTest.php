@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,8 +23,8 @@ it('exposes the personal library via the library relationship', function (): voi
     $songB = Song::factory()->create();
     Song::factory()->create();
 
-    LibraryEntry::factory()->create(['user_id' => $user->id, 'song_id' => $songA->id]);
-    LibraryEntry::factory()->create(['user_id' => $user->id, 'song_id' => $songB->id]);
+    PlaylistSong::factory()->create(['user_id' => $user->id, 'song_id' => $songA->id]);
+    PlaylistSong::factory()->create(['user_id' => $user->id, 'song_id' => $songB->id]);
 
     expect($user->library)->toHaveCount(2)
         ->and($user->library->pluck('id')->all())

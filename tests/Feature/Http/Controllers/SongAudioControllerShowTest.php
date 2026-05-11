@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,7 +36,7 @@ it('lets the uploader stream their own song', function (): void {
 it('lets a user with the song in their library stream it', function (): void {
     $listener = User::factory()->create();
     $song = Song::factory()->create(['file_path' => 'songs/sample.mp3']);
-    LibraryEntry::factory()->create(['user_id' => $listener->id, 'song_id' => $song->id]);
+    PlaylistSong::factory()->create(['user_id' => $listener->id, 'song_id' => $song->id]);
 
     $this->actingAs($listener)
         ->get(route('songs.audio', $song))

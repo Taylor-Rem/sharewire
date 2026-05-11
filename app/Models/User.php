@@ -41,10 +41,15 @@ class User extends Authenticatable
         return $this->hasMany(Song::class, 'uploaded_by_user_id');
     }
 
+    public function playlists(): HasMany
+    {
+        return $this->hasMany();
+    }
+
     public function library(): BelongsToMany
     {
         return $this->belongsToMany(Song::class, 'library_entries')
-            ->using(LibraryEntry::class)
+            ->using(PlaylistSong::class)
             ->withPivot(['id', 'position', 'added_at'])
             ->withTimestamps();
     }

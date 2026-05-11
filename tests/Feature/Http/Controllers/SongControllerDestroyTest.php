@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -45,7 +45,7 @@ it('cascades library_entries when the song is deleted', function (): void {
     $uploader = User::factory()->create();
     $listener = User::factory()->create();
     $song = Song::factory()->for($uploader, 'uploader')->create();
-    $entry = LibraryEntry::factory()->create([
+    $entry = PlaylistSong::factory()->create([
         'user_id' => $listener->id,
         'song_id' => $song->id,
     ]);
@@ -53,7 +53,7 @@ it('cascades library_entries when the song is deleted', function (): void {
     $this->actingAs($uploader)->delete(route('songs.destroy', $song));
 
     expect(Song::find($song->id))->toBeNull()
-        ->and(LibraryEntry::find($entry->id))->toBeNull();
+        ->and(PlaylistSong::find($entry->id))->toBeNull();
 });
 
 it('forbids non-uploaders from deleting a song', function (): void {

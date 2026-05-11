@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,7 +49,7 @@ it('walks the full upload → browse → add → stream → remove → uploader-
         ->post(route('library.store', $song))
         ->assertRedirect(route('songs.index'));
 
-    expect(LibraryEntry::count())->toBe(1);
+    expect(PlaylistSong::count())->toBe(1);
 
     // 4. The shared library now reflects "in my library".
     $this->actingAs($bob)
@@ -73,13 +73,13 @@ it('walks the full upload → browse → add → stream → remove → uploader-
         );
 
     // 7. Bob removes the song from his library.
-    $entry = LibraryEntry::firstOrFail();
+    $entry = PlaylistSong::firstOrFail();
     $this->actingAs($bob)
         ->from(route('library.index'))
         ->delete(route('library.destroy', $entry))
         ->assertRedirect(route('library.index'));
 
-    expect(LibraryEntry::count())->toBe(0);
+    expect(PlaylistSong::count())->toBe(0);
 
     // 8. Alice (the uploader) deletes the song. File goes away; row cascades clean.
     $this->actingAs($alice)

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\LibraryEntry;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
 use App\Policies\SongPolicy;
@@ -55,7 +55,7 @@ it('lets the uploader play their own song without it being in their library', fu
 });
 
 it('lets a user play a song that is in their library', function (): void {
-    LibraryEntry::factory()->create([
+    PlaylistSong::factory()->create([
         'user_id' => $this->otherUser->id,
         'song_id' => $this->song->id,
     ]);
