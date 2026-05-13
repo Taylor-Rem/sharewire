@@ -9,8 +9,9 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { index as myLibraryRoute } from '@/routes/library';
 import { dashboard } from '@/routes';
+import { index as myLibraryRoute } from '@/routes/playlist_song';
+import { index as playlistsIndexRoute } from '@/routes/playlists';
 import { create as uploadSongRoute, index as sharedLibraryRoute } from '@/routes/songs';
 
 type DashboardCard = {
@@ -33,9 +34,9 @@ defineOptions({
 
 const cards: DashboardCard[] = [
     {
-        title: 'My library',
+        title: 'Playlists',
         description: 'Listen to the songs you\'ve added. The player follows you across the app.',
-        href: myLibraryRoute(),
+        href: playlistsIndexRoute(),
         icon: Headphones,
     },
     {

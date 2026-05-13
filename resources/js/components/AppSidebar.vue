@@ -14,8 +14,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { index as myLibraryRoute } from '@/routes/library';
 import { dashboard } from '@/routes';
+import { index as myLibraryRoute } from '@/routes/playlist_song';
+import { index as playlistsIndexRoute } from '@/routes/playlists';
 import { create as uploadSongRoute, index as sharedLibraryRoute } from '@/routes/songs';
 import type { NavItem } from '@/types';
 
@@ -26,8 +27,8 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'My library',
-        href: myLibraryRoute(),
+        title: 'Playlists',
+        href: playlistsIndexRoute(),
         icon: Headphones,
     },
     {
