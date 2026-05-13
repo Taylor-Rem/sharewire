@@ -24,7 +24,8 @@ class SongController extends Controller
 
         $songs = Song::query()
             ->with('uploader:id,name')
-            ->withCount(['inLibrariesOf as is_in_my_library_count' => fn ($query) => $query->where('users.id', $user->id)])
+            ->withExists(['Playlists as is_in_my_library' => fn ($q) => $q->where('user_id', $user->id)->where('is_primary', true),
+            ])
             ->search($q)
             ->when($mineOnly, fn ($query) => $query->where('uploaded_by_user_id', $user->id))
             ->orderByDesc('created_at')

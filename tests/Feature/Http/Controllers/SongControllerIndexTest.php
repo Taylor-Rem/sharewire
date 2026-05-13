@@ -83,14 +83,14 @@ it('filters by album and genre via the q parameter', function (): void {
     );
 });
 
-it('reflects whether each song is in the current users library', function (): void {
+it('reflects whether each song is in the current users primary playlist', function (): void {
     $user = User::factory()->create();
-    $inLibrary = Song::factory()->create();
-    $notInLibrary = Song::factory()->create();
+    $inPlaylist = Song::factory()->create();
+    $notInPlaylist = Song::factory()->create();
 
     PlaylistSong::factory()->create([
-        'user_id' => $user->id,
-        'song_id' => $inLibrary->id,
+        'playlist_id' => $user->primaryPlaylist->id,
+        'song_id' => $inPlaylist->id,
     ]);
 
     $response = $this->actingAs($user)->get('/songs');
@@ -99,8 +99,8 @@ it('reflects whether each song is in the current users library', function (): vo
         ->has('songs.data', 2)
         ->where(
             'songs.data',
-            fn ($rows) => collect($rows)->firstWhere('id', $inLibrary->id)['is_in_my_library'] === true
-                && collect($rows)->firstWhere('id', $notInLibrary->id)['is_in_my_library'] === false,
+            fn ($rows) => collect($rows)->firstWhere('id', $inPlaylist->id)['is_in_my_library'] === true
+                && collect($rows)->firstWhere('id', $notInPlaylist->id)['is_in_my_library'] === false,
         )
     );
 });

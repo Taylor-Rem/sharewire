@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+
+#[ObservedBy([UserObserver::class])]
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -43,14 +47,13 @@ class User extends Authenticatable
 
     public function playlists(): HasMany
     {
-        return $this->hasMany();
+        return $this->hasMany(Playlist::class);
     }
 
-    public function library(): BelongsToMany
+    public function primaryPlaylist(): HasOne
     {
-        return $this->belongsToMany(Song::class, 'library_entries')
-            ->using(PlaylistSong::class)
-            ->withPivot(['id', 'position', 'added_at'])
-            ->withTimestamps();
+        return $this->hasOne(Playlist::class)->ofMany([
+            'id' => 'min',
+        ], fn ($q) => $q->where('is_primary', true));
     }
 }

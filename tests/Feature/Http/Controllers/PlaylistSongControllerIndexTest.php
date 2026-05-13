@@ -10,20 +10,26 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('redirects guests to the login screen', function (): void {
-    $this->get(route('library.index'))->assertRedirect('/login');
+    $this->get(route('playlist_song.index'))->assertRedirect('/login');
 });
 
-it('renders the personal library page with only the users own entries', function (): void {
+it('renders the primary playlist page with only the users own songs', function (): void {
     $user = User::factory()->create();
     $other = User::factory()->create();
 
     $mySong = Song::factory()->create(['title' => 'Mine']);
     $otherSong = Song::factory()->create(['title' => 'Theirs']);
 
-    PlaylistSong::factory()->create(['user_id' => $user->id, 'song_id' => $mySong->id]);
-    PlaylistSong::factory()->create(['user_id' => $other->id, 'song_id' => $otherSong->id]);
+    PlaylistSong::factory()->create([
+        'playlist_id' => $user->primaryPlaylist->id,
+        'song_id' => $mySong->id,
+    ]);
+    PlaylistSong::factory()->create([
+        'playlist_id' => $other->primaryPlaylist->id,
+        'song_id' => $otherSong->id,
+    ]);
 
-    $response = $this->actingAs($user)->get(route('library.index'));
+    $response = $this->actingAs($user)->get(route('playlist_song.index'));
 
     $response->assertOk();
     $response->assertInertia(
@@ -41,17 +47,17 @@ it('returns the songs ordered by added_at desc', function (): void {
     $second = Song::factory()->create();
 
     PlaylistSong::factory()->create([
-        'user_id' => $user->id,
+        'playlist_id' => $user->primaryPlaylist->id,
         'song_id' => $first->id,
         'added_at' => now()->subDay(),
     ]);
     PlaylistSong::factory()->create([
-        'user_id' => $user->id,
+        'playlist_id' => $user->primaryPlaylist->id,
         'song_id' => $second->id,
         'added_at' => now(),
     ]);
 
-    $response = $this->actingAs($user)->get(route('library.index'));
+    $response = $this->actingAs($user)->get(route('playlist_song.index'));
 
     $response->assertInertia(fn ($page) => $page
         ->where('songs.data.0.id', $second->id)
@@ -63,10 +69,13 @@ it('paginates 20 per page', function (): void {
     $user = User::factory()->create();
     $songs = Song::factory()->count(25)->create();
     foreach ($songs as $song) {
-        PlaylistSong::factory()->create(['user_id' => $user->id, 'song_id' => $song->id]);
+        PlaylistSong::factory()->create([
+            'playlist_id' => $user->primaryPlaylist->id,
+            'song_id' => $song->id,
+        ]);
     }
 
-    $response = $this->actingAs($user)->get(route('library.index'));
+    $response = $this->actingAs($user)->get(route('playlist_song.index'));
 
     $response->assertInertia(fn ($page) => $page
         ->has('songs.data', 20)
@@ -78,9 +87,12 @@ it('eager-loads the uploader to avoid N+1', function (): void {
     $user = User::factory()->create();
     $uploader = User::factory()->create(['name' => 'Some Uploader']);
     $song = Song::factory()->for($uploader, 'uploader')->create();
-    PlaylistSong::factory()->create(['user_id' => $user->id, 'song_id' => $song->id]);
+    PlaylistSong::factory()->create([
+        'playlist_id' => $user->primaryPlaylist->id,
+        'song_id' => $song->id,
+    ]);
 
-    $response = $this->actingAs($user)->get(route('library.index'));
+    $response = $this->actingAs($user)->get(route('playlist_song.index'));
 
     $response->assertInertia(fn ($page) => $page
         ->where('songs.data.0.uploader.name', 'Some Uploader')

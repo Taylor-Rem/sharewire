@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Playlist;
 use App\Models\PlaylistSong;
 use App\Models\Song;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,9 +20,8 @@ class PlaylistSongFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
+            'playlist_id' => Playlist::factory(),
             'song_id' => Song::factory(),
-            'position' => null,
             'added_at' => now(),
         ];
     }

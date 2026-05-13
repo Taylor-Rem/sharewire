@@ -41,12 +41,12 @@ it('lets the uploader delete their song and removes the audio file from disk', f
     Storage::disk('local')->assertMissing($stored);
 });
 
-it('cascades library_entries when the song is deleted', function (): void {
+it('cascades playlist_songs when the song is deleted', function (): void {
     $uploader = User::factory()->create();
     $listener = User::factory()->create();
     $song = Song::factory()->for($uploader, 'uploader')->create();
     $entry = PlaylistSong::factory()->create([
-        'user_id' => $listener->id,
+        'playlist_id' => $listener->primaryPlaylist->id,
         'song_id' => $song->id,
     ]);
 

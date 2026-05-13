@@ -50,19 +50,19 @@ it('forbids restore and forceDelete unconditionally', function (): void {
         ->and($this->policy->forceDelete($this->uploader, $this->song))->toBeFalse();
 });
 
-it('lets the uploader play their own song without it being in their library', function (): void {
+it('lets the uploader play their own song without it being in their primary playlist', function (): void {
     expect($this->policy->play($this->uploader, $this->song))->toBeTrue();
 });
 
-it('lets a user play a song that is in their library', function (): void {
+it('lets a user play a song that is in their primary playlist', function (): void {
     PlaylistSong::factory()->create([
-        'user_id' => $this->otherUser->id,
+        'playlist_id' => $this->otherUser->primaryPlaylist->id,
         'song_id' => $this->song->id,
     ]);
 
     expect($this->policy->play($this->otherUser, $this->song))->toBeTrue();
 });
 
-it('forbids playing a song that is not in the users library and they did not upload', function (): void {
+it('forbids playing a song that is not in the users primary playlist and they did not upload', function (): void {
     expect($this->policy->play($this->otherUser, $this->song))->toBeFalse();
 });

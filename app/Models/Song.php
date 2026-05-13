@@ -45,11 +45,11 @@ class Song extends Model
         return $this->belongsTo(User::class, 'uploaded_by_user_id');
     }
 
-    public function inLibrariesOf(): BelongsToMany
+    public function playlists(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'library_entries')
+        return $this->belongsToMany(Playlist::class, 'playlist_songs')
             ->using(PlaylistSong::class)
-            ->withPivot(['id', 'position', 'added_at'])
+            ->withPivot(['id', 'added_at'])
             ->withTimestamps();
     }
 

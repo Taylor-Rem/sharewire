@@ -3,7 +3,7 @@ import { Form, Head, Link, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { Check, Disc3, Plus, Trash2 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import LibraryEntryController from '@/actions/App/Http/Controllers/LibraryEntryController';
+import PlaylistSongController from '@/actions/App/Http/Controllers/PlaylistSongController';
 import SongController from '@/actions/App/Http/Controllers/SongController';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
@@ -197,7 +197,7 @@ const formatDuration = (seconds: number | null): string => {
                                 </Button>
                                 <Form
                                     v-else
-                                    v-bind="LibraryEntryController.store.form({ song: song.id })"
+                                    v-bind="PlaylistSongController.store.form({ song: song.id })"
                                     :options="{ preserveScroll: true }"
                                     #default="{ processing }"
                                 >

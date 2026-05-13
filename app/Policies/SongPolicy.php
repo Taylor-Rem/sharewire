@@ -44,7 +44,11 @@ class SongPolicy
             return true;
         }
 
-        return $user->library()->where('songs.id', $song->id)->exists();
+        return $user->primaryPlaylist
+            ?->songs()
+            ->whereKey($song->id)
+            ->exists()
+            ?? false;
     }
 
     public function restore(User $user, Song $song): bool

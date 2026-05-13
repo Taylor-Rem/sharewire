@@ -11,9 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 #[Fillable([
-    'user_id',
+    'playlist_id',
     'song_id',
-    'position',
     'added_at',
 ])]
 class PlaylistSong extends Pivot
@@ -23,7 +22,7 @@ class PlaylistSong extends Pivot
 
     public $incrementing = true;
 
-    protected $table = 'playlist_song';
+    protected $table = 'playlist_songs';
 
     /**
      * @return array<string, string>
@@ -31,19 +30,17 @@ class PlaylistSong extends Pivot
     protected function casts(): array
     {
         return [
-            'position' => 'integer',
             'added_at' => 'datetime',
         ];
     }
 
-    public function user(): BelongsTo
+    public function playlist(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Playlist::class);
     }
 
     public function song(): BelongsTo
     {
         return $this->belongsTo(Song::class);
     }
-
 }

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\AddSongToLibrary;
+use App\Actions\AddSongToPlaylist;
 use App\Actions\RemoveSongFromLibrary;
 use App\Http\Requests\AddSongToLibraryRequest;
 use App\Http\Resources\SongResource;
+use App\Models\Playlist;
 use App\Models\PlaylistSong;
 use App\Models\Song;
 use Illuminate\Http\RedirectResponse;
@@ -15,12 +16,13 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class LibraryEntryController extends Controller
+class PlaylistSongController extends Controller
 {
     public function index(Request $request): Response
     {
         $songs = $request->user()
-            ->library()
+            ->primaryPlaylist
+            ->songs()
             ->with('uploader:id,name')
             ->orderByPivot('added_at', 'desc')
             ->paginate(20);
@@ -37,9 +39,11 @@ class LibraryEntryController extends Controller
     public function store(
         AddSongToLibraryRequest $request,
         Song $song,
-        AddSongToLibrary $addSongToLibrary,
+        AddSongToPlaylist $addSongToLibrary,
     ): RedirectResponse {
-        $addSongToLibrary($request->user(), $song);
+        $playlist = Playlist::findOrFail($request->validated('playlist_id'));
+
+        $addSongToLibrary($request->user(), $song, $playlist);
 
         Inertia::flash('toast', [
             'type' => 'success',
@@ -50,14 +54,14 @@ class LibraryEntryController extends Controller
     }
 
     public function destroy(
-        PlaylistSong $libraryEntry,
+        PlaylistSong $playlistSong,
         RemoveSongFromLibrary $removeSongFromLibrary,
     ): RedirectResponse {
-        $this->authorize('delete', $libraryEntry);
+        $this->authorize('delete', $playlistSong);
 
-        $title = $libraryEntry->song?->title ?? 'song';
+        $title = $playlistSong->song?->title ?? 'song';
 
-        $removeSongFromLibrary($libraryEntry);
+        $removeSongFromLibrary($playlistSong);
 
         Inertia::flash('toast', [
             'type' => 'success',

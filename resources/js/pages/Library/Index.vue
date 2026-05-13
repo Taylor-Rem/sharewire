@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
 import { Disc3, Pause, Play, Trash2 } from 'lucide-vue-next';
-import LibraryEntryController from '@/actions/App/Http/Controllers/LibraryEntryController';
+import PlaylistSongController from '@/actions/App/Http/Controllers/PlaylistSongController';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePlayer } from '@/composables/usePlayer';
-import { index as libraryIndexRoute } from '@/routes/library';
+import { index as libraryIndexRoute } from '@/routes/playlist_song';
 import { index as sharedLibraryRoute } from '@/routes/songs';
 
 type Uploader = {
@@ -156,7 +156,7 @@ const formatDuration = (seconds: number | null): string => {
                                 </Button>
                                 <Form
                                     v-if="song.pivot?.id"
-                                    v-bind="LibraryEntryController.destroy.form({ libraryEntry: song.pivot.id })"
+                                    v-bind="PlaylistSongController.destroy.form({ playlistSong: song.pivot.id })"
                                     :options="{ preserveScroll: true }"
                                     #default="{ processing }"
                                 >

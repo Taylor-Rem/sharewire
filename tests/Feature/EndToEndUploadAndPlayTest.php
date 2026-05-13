@@ -33,7 +33,7 @@ it('walks the full upload → browse → add → stream → remove → uploader-
     expect($song->uploaded_by_user_id)->toBe($alice->id);
     Storage::disk('local')->assertExists($song->file_path);
 
-    // 2. Bob browses the shared library and sees Alice's upload, not yet in his library.
+    // 2. Bob browses the shared song catalog and sees Alice's upload, not yet in his primary playlist.
     $this->actingAs($bob)
         ->get(route('songs.index'))
         ->assertOk()
@@ -42,16 +42,15 @@ it('walks the full upload → browse → add → stream → remove → uploader-
             ->where('songs.data.0.title', 'The Cosmic Drift')
             ->where('songs.data.0.is_in_my_library', false)
         );
-
-    // 3. Bob adds it to his personal library.
+    // 3. Bob adds it to his primary playlist.
     $this->actingAs($bob)
         ->from(route('songs.index'))
-        ->post(route('library.store', $song))
+        ->post(route('playlist_song.store', $song), ['playlist_id' => $bob->primaryPlaylist->id])
         ->assertRedirect(route('songs.index'));
 
     expect(PlaylistSong::count())->toBe(1);
 
-    // 4. The shared library now reflects "in my library".
+    // 4. The shared song catalog now reflects "in my primary playlist".
     $this->actingAs($bob)
         ->get(route('songs.index'))
         ->assertInertia(fn ($page) => $page
@@ -64,20 +63,20 @@ it('walks the full upload → browse → add → stream → remove → uploader-
         ->assertOk()
         ->assertHeader('Accept-Ranges', 'bytes');
 
-    // 6. Bob's personal library shows it.
+    // 6. Bob's primary playlist shows it.
     $this->actingAs($bob)
-        ->get(route('library.index'))
+        ->get(route('playlist_song.index'))
         ->assertInertia(fn ($page) => $page
             ->has('songs.data', 1)
             ->where('songs.data.0.id', $song->id)
         );
 
-    // 7. Bob removes the song from his library.
-    $entry = PlaylistSong::firstOrFail();
+    // 7. Bob removes the song from his primary playlist.
+    $entry = PlaylistSong::with('playlist')->firstOrFail();
     $this->actingAs($bob)
-        ->from(route('library.index'))
-        ->delete(route('library.destroy', $entry))
-        ->assertRedirect(route('library.index'));
+        ->from(route('playlist_song.index'))
+        ->delete(route('playlist_song.destroy', $entry))
+        ->assertRedirect(route('playlist_song.index'));
 
     expect(PlaylistSong::count())->toBe(0);
 

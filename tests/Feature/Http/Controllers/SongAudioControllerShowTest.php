@@ -33,10 +33,13 @@ it('lets the uploader stream their own song', function (): void {
         ->assertHeader('Accept-Ranges', 'bytes');
 });
 
-it('lets a user with the song in their library stream it', function (): void {
+it('lets a user with the song in their primary playlist stream it', function (): void {
     $listener = User::factory()->create();
     $song = Song::factory()->create(['file_path' => 'songs/sample.mp3']);
-    PlaylistSong::factory()->create(['user_id' => $listener->id, 'song_id' => $song->id]);
+    PlaylistSong::factory()->create([
+        'playlist_id' => $listener->primaryPlaylist->id,
+        'song_id' => $song->id,
+    ]);
 
     $this->actingAs($listener)
         ->get(route('songs.audio', $song))
