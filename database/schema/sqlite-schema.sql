@@ -96,20 +96,6 @@ CREATE TABLE IF NOT EXISTS "songs"(
   foreign key("uploaded_by_user_id") references "users"("id") on delete cascade
 );
 CREATE INDEX "songs_title_artist_index" on "songs"("title", "artist");
-CREATE TABLE IF NOT EXISTS "playlist_songs"(
-  "id" integer primary key autoincrement not null,
-  "user_id" integer not null,
-  "song_id" integer not null,
-  "added_at" datetime not null default CURRENT_TIMESTAMP,
-  "created_at" datetime,
-  "updated_at" datetime,
-  foreign key("user_id") references "users"("id") on delete cascade,
-  foreign key("song_id") references "songs"("id") on delete cascade
-);
-CREATE UNIQUE INDEX "library_entries_user_id_song_id_unique" on "playlist_songs"(
-  "user_id",
-  "song_id"
-);
 CREATE TABLE IF NOT EXISTS "playlists"(
   "id" integer primary key autoincrement not null,
   "name" varchar not null,
@@ -118,6 +104,20 @@ CREATE TABLE IF NOT EXISTS "playlists"(
   "created_at" datetime,
   "updated_at" datetime,
   foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "playlist_songs"(
+  "id" integer primary key autoincrement not null,
+  "song_id" integer not null,
+  "added_at" datetime not null default(CURRENT_TIMESTAMP),
+  "created_at" datetime,
+  "updated_at" datetime,
+  "playlist_id" integer not null,
+  foreign key("song_id") references songs("id") on delete cascade on update no action,
+  foreign key("playlist_id") references playlists("id") on delete cascade on update no action
+);
+CREATE UNIQUE INDEX "playlist_songs_playlist_id_song_id_unique" on "playlist_songs"(
+  "playlist_id",
+  "song_id"
 );
 
 INSERT INTO migrations VALUES(1,'0001_01_01_000000_create_users_table',1);
@@ -129,3 +129,6 @@ INSERT INTO migrations VALUES(6,'2026_05_05_225716_create_library_entries_table'
 INSERT INTO migrations VALUES(7,'2026_05_08_173415_rename_library_entries_to_playlist_songs',4);
 INSERT INTO migrations VALUES(8,'2026_05_08_173659_create_playlists_table',5);
 INSERT INTO migrations VALUES(9,'2026_05_08_180648_drop_position_from_playlist_songs_table',6);
+INSERT INTO migrations VALUES(10,'2026_05_08_174622_add_playlist_id_to_playlist_songs_table',7);
+INSERT INTO migrations VALUES(11,'2026_05_11_155840_backfill_playlist_id_on_playlist_songs',7);
+INSERT INTO migrations VALUES(12,'2026_05_11_155840_drop_user_id_from_playlist_songs_table',7);
