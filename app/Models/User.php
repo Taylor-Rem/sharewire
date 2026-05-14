@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -55,5 +56,21 @@ class User extends Authenticatable
         return $this->hasOne(Playlist::class)->ofMany([
             'id' => 'min',
         ], fn ($q) => $q->where('is_primary', true));
+    }
+
+    /**
+     * Every PlaylistSong row across all of the user's playlists.
+     *
+     * Two-hop relation: users → playlists → playlist_songs.
+     *
+     * Eager-load `song` to get the actual Song models:
+     *     $user->playlistSongs()->with('song')->get()
+     *
+     * Or use whereHas:
+     *     PlaylistSong::whereRelation('playlist', 'user_id', $user->id)->get()
+     */
+    public function playlistSongs(): HasManyThrough
+    {
+        return $this->hasManyThrough(PlaylistSong::class, Playlist::class);
     }
 }
