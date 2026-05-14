@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::table('playlist_songs', function (Blueprint $table) {
             $table->foreignId('playlist_id')
+                ->nullable()
                 ->constrained('playlists')
-                ->cascadeOnDelete()
-                ->nullable();
+                ->cascadeOnDelete();
         });
     }
 
