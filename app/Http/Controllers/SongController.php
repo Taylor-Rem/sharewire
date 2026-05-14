@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\UploadSong;
+use App\Data\PlaylistData;
 use App\Data\UploadSongData;
 use App\Http\Requests\UploadSongRequest;
 use App\Http\Resources\SongResource;
@@ -40,10 +41,12 @@ class SongController extends Controller
         return Inertia::render('Songs/Index', [
             'songs' => SongResource::collection($songs),
             'filters' => ['q' => $q, 'mine' => $mineOnly],
-            'playlists' => $user->playlists()
-                ->orderByDesc('is_primary')
-                ->orderBy('name')
-                ->get(['id', 'name', 'is_primary']),
+            'playlists' => PlaylistData::collect(
+                $user->playlists()
+                    ->orderByDesc('is_primary')
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'is_primary']),
+            ),
         ]);
     }
 

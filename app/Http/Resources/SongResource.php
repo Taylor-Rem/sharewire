@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Data\SongData;
 use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * Thin shim over SongData. The Data class is the source of truth for the wire
+ * shape and is what generates the TypeScript types. This Resource exists only
+ * to leverage Laravel's AnonymousResourceCollection pagination wrapping
+ * ({ data, meta, links }) when used as ::collection($paginator).
+ *
  * @mixin Song
  */
 class SongResource extends JsonResource
@@ -18,28 +24,6 @@ class SongResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'artist' => $this->artist,
-            'album' => $this->album,
-            'genre' => $this->genre,
-            'duration_seconds' => $this->duration_seconds,
-            'mime_type' => $this->mime_type,
-            'uploader' => [
-                'id' => $this->uploaded_by_user_id,
-                'name' => $this->whenLoaded('uploader', fn () => $this->uploader?->name),
-            ],
-            'is_in_my_library' => (bool) ($this->is_in_my_library ?? $this->is_in_my_library_count ?? false),
-            'my_playlist_ids' => $this->whenLoaded(
-                'playlists',
-                fn () => $this->playlists->pluck('id')->all(),
-                [],
-            ),
-            'is_uploader' => $request->user()?->id === $this->uploaded_by_user_id,
-            'audio_url' => route('songs.audio', ['song' => $this->id]),
-            'pivot' => $this->pivot ? ['id' => (int) $this->pivot->id] : null,
-            'created_at' => $this->created_at?->toIso8601String(),
-        ];
+        return SongData::fromModel($this->resource, $request->user())->toArray();
     }
 }

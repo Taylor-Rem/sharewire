@@ -22,12 +22,7 @@ import { dashboard } from '@/routes';
 import { index as playlistsIndexRoute, show as playlistShowRoute } from '@/routes/playlists';
 import type { BreadcrumbItem } from '@/types';
 
-interface Playlist {
-    id: number;
-    name: string;
-    is_primary: boolean;
-    playlist_songs_count?: number;
-}
+type Playlist = App.Data.PlaylistData;
 
 defineProps<{ playlists: Playlist[] }>();
 

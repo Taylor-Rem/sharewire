@@ -9,32 +9,8 @@ import { usePlayer } from '@/composables/usePlayer';
 import { index as playlistsIndexRoute } from '@/routes/playlists';
 import { index as sharedLibraryRoute } from '@/routes/songs';
 
-type Uploader = {
-    id: number;
-    name: string | null;
-};
-
-type Playlist = {
-    id: number;
-    name: string | null;
-    is_primary: boolean;
-};
-
-type SongRow = {
-    id: number;
-    title: string;
-    artist: string;
-    album: string | null;
-    genre: string | null;
-    duration_seconds: number | null;
-    mime_type: string;
-    uploader: Uploader;
-    is_in_my_library: boolean;
-    is_uploader: boolean;
-    audio_url: string;
-    created_at: string | null;
-    pivot?: { id: number };
-};
+type Playlist = App.Data.PlaylistData;
+type SongRow = App.Data.SongData;
 
 type PaginationLink = {
     url: string | null;

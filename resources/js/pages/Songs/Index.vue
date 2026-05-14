@@ -31,32 +31,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { index as songsIndexRoute } from '@/routes/songs';
 
-type Uploader = {
-    id: number;
-    name: string | null;
-};
-
-type SongRow = {
-    id: number;
-    title: string;
-    artist: string;
-    album: string | null;
-    genre: string | null;
-    duration_seconds: number | null;
-    mime_type: string;
-    uploader: Uploader;
-    is_in_my_library: boolean;
-    is_uploader: boolean;
-    audio_url: string;
-    my_playlist_ids: number[];
-    created_at: string | null;
-};
-
-type Playlist = {
-    id: number;
-    name: string;
-    is_primary: boolean;
-};
+type SongRow = App.Data.SongData;
+type Playlist = App.Data.PlaylistData;
 
 type PaginationLink = {
     url: string | null;

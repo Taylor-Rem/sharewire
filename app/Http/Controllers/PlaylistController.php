@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Data\PlaylistData;
 use App\Http\Requests\StorePlaylistRequest;
 use App\Http\Requests\UpdatePlaylistRequest;
 use App\Http\Resources\SongResource;
@@ -19,12 +20,14 @@ class PlaylistController extends Controller
     public function index(Request $request): Response
     {
         return Inertia::render('Playlists/Index', [
-            'playlists' => $request->user()
-                ->playlists()
-                ->withCount('playlistSongs')
-                ->orderByDesc('is_primary')
-                ->orderBy('name')
-                ->get(),
+            'playlists' => PlaylistData::collect(
+                $request->user()
+                    ->playlists()
+                    ->withCount('playlistSongs')
+                    ->orderByDesc('is_primary')
+                    ->orderBy('name')
+                    ->get(),
+            ),
         ]);
     }
 
@@ -57,7 +60,7 @@ class PlaylistController extends Controller
         );
 
         return Inertia::render('Playlists/Show', [
-            'playlist' => $playlist->only(['id', 'name', 'is_primary']),
+            'playlist' => PlaylistData::fromModel($playlist),
             'songs' => SongResource::collection($songs),
         ]);
     }
