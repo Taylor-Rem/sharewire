@@ -65,7 +65,7 @@ it('walks the full upload → browse → add → stream → remove → uploader-
 
     // 6. Bob's primary playlist shows it.
     $this->actingAs($bob)
-        ->get(route('playlist_song.index'))
+        ->get(route('playlists.show', $bob->primaryPlaylist->id))
         ->assertInertia(fn ($page) => $page
             ->has('songs.data', 1)
             ->where('songs.data.0.id', $song->id)
@@ -74,9 +74,9 @@ it('walks the full upload → browse → add → stream → remove → uploader-
     // 7. Bob removes the song from his primary playlist.
     $entry = PlaylistSong::with('playlist')->firstOrFail();
     $this->actingAs($bob)
-        ->from(route('playlist_song.index'))
+        ->from(route('playlists.show', $entry->playlist->id))
         ->delete(route('playlist_song.destroy', $entry))
-        ->assertRedirect(route('playlist_song.index'));
+        ->assertRedirect(route('playlists.show', $bob->primaryPlaylist->id));
 
     expect(PlaylistSong::count())->toBe(0);
 

@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('songs.audio');
 
     Route::resource('playlist_song', PlaylistSongController::class)
-        ->only(['index', 'destroy'])
+        ->only(['destroy'])
         ->parameters(['playlist_song' => 'playlistSong']);
     Route::post('songs/{song}/playlist_song', [PlaylistSongController::class, 'store'])
         ->name('playlist_song.store');

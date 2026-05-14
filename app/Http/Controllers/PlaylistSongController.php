@@ -18,24 +18,6 @@ use Inertia\Response;
 
 class PlaylistSongController extends Controller
 {
-    public function index(Request $request): Response
-    {
-        $songs = $request->user()
-            ->primaryPlaylist
-            ->songs()
-            ->with('uploader:id,name')
-            ->orderByPivot('added_at', 'desc')
-            ->paginate(20);
-
-        $songs->getCollection()->each(
-            fn (Song $song) => $song->setAttribute('is_in_my_library', true),
-        );
-
-        return Inertia::render('Library/Index', [
-            'songs' => SongResource::collection($songs),
-        ]);
-    }
-
     public function store(
         AddSongToLibraryRequest $request,
         Song $song,

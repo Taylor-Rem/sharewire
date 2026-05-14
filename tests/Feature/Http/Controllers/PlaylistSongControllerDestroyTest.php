@@ -25,10 +25,10 @@ it('lets the owner remove a song from their primary playlist and flashes a toast
     ]);
 
     $response = $this->actingAs($user)
-        ->from(route('playlist_song.index'))
+        ->from(route('playlists.show', $entry->playlist_id))
         ->delete(route('playlist_song.destroy', $entry));
 
-    $response->assertRedirect(route('playlist_song.index'));
+    $response->assertRedirect(route('playlists.show', $entry->playlist_id));
     $response->assertInertiaFlash('toast', [
         'type' => 'success',
         'message' => 'Removed "Cosmic Drift" from your library.',

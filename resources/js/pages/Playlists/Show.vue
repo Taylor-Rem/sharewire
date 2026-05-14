@@ -6,12 +6,18 @@ import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePlayer } from '@/composables/usePlayer';
-import { index as libraryIndexRoute } from '@/routes/playlist_song';
+import { index as playlistsIndexRoute } from '@/routes/playlists';
 import { index as sharedLibraryRoute } from '@/routes/songs';
 
 type Uploader = {
     id: number;
     name: string | null;
+};
+
+type Playlist = {
+    id: number;
+    name: string | null;
+    is_primary: boolean;
 };
 
 type SongRow = {
@@ -49,6 +55,7 @@ type Paginator<T> = {
 };
 
 type Props = {
+    playlist: Playlist;
     songs: Paginator<SongRow>;
 };
 
@@ -58,8 +65,8 @@ defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'My library',
-                href: libraryIndexRoute(),
+                title: 'Playlists',
+                href: playlistsIndexRoute(),
             },
         ],
     },
@@ -85,14 +92,14 @@ const formatDuration = (seconds: number | null): string => {
 </script>
 
 <template>
-    <Head title="My library" />
+    <Head :title="playlist.name ?? 'Playlist'" />
 
-    <h1 class="sr-only">My library</h1>
+    <h1 class="sr-only">{{ playlist.name }}</h1>
 
     <div class="flex h-full flex-1 flex-col gap-6 p-4">
         <Heading
-            title="My library"
-            description="Songs you've added. Click play to stream — playback persists as you navigate."
+            :title="playlist.name ?? 'Playlist'"
+            description="Songs in this playlist. Click play to stream — playback persists as you navigate."
         />
 
         <div
@@ -108,7 +115,9 @@ const formatDuration = (seconds: number | null): string => {
 
         <div v-else class="overflow-x-auto rounded-xl border">
             <table class="w-full text-left text-sm">
-                <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                <thead
+                    class="bg-muted/50 text-xs text-muted-foreground uppercase"
+                >
                     <tr>
                         <th class="px-4 py-3 font-medium">Title</th>
                         <th class="px-4 py-3 font-medium">Artist</th>
@@ -116,7 +125,9 @@ const formatDuration = (seconds: number | null): string => {
                         <th class="px-4 py-3 font-medium">Genre</th>
                         <th class="px-4 py-3 font-medium">Duration</th>
                         <th class="px-4 py-3 font-medium">Uploader</th>
-                        <th class="px-4 py-3 text-right font-medium">Actions</th>
+                        <th class="px-4 py-3 text-right font-medium">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -128,12 +139,18 @@ const formatDuration = (seconds: number | null): string => {
                     >
                         <td class="px-4 py-3 font-medium">{{ song.title }}</td>
                         <td class="px-4 py-3">{{ song.artist }}</td>
-                        <td class="px-4 py-3 text-muted-foreground">{{ song.album ?? '—' }}</td>
+                        <td class="px-4 py-3 text-muted-foreground">
+                            {{ song.album ?? '—' }}
+                        </td>
                         <td class="px-4 py-3">
-                            <Badge v-if="song.genre" variant="secondary">{{ song.genre }}</Badge>
+                            <Badge v-if="song.genre" variant="secondary">{{
+                                song.genre
+                            }}</Badge>
                             <span v-else class="text-muted-foreground">—</span>
                         </td>
-                        <td class="px-4 py-3 tabular-nums text-muted-foreground">
+                        <td
+                            class="px-4 py-3 text-muted-foreground tabular-nums"
+                        >
                             {{ formatDuration(song.duration_seconds) }}
                         </td>
                         <td class="px-4 py-3 text-muted-foreground">
@@ -149,14 +166,28 @@ const formatDuration = (seconds: number | null): string => {
                                     @click="onPlay(song)"
                                 >
                                     <component
-                                        :is="player.isCurrentTrack(song.id).value && player.isPlaying.value ? Pause : Play"
+                                        :is="
+                                            player.isCurrentTrack(song.id)
+                                                .value && player.isPlaying.value
+                                                ? Pause
+                                                : Play
+                                        "
                                         class="size-4"
                                     />
-                                    {{ player.isCurrentTrack(song.id).value && player.isPlaying.value ? 'Pause' : 'Play' }}
+                                    {{
+                                        player.isCurrentTrack(song.id).value &&
+                                        player.isPlaying.value
+                                            ? 'Pause'
+                                            : 'Play'
+                                    }}
                                 </Button>
                                 <Form
                                     v-if="song.pivot?.id"
-                                    v-bind="PlaylistSongController.destroy.form({ playlistSong: song.pivot.id })"
+                                    v-bind="
+                                        PlaylistSongController.destroy.form({
+                                            playlistSong: song.pivot.id,
+                                        })
+                                    "
                                     :options="{ preserveScroll: true }"
                                     #default="{ processing }"
                                 >
@@ -178,7 +209,10 @@ const formatDuration = (seconds: number | null): string => {
             </table>
         </div>
 
-        <nav v-if="props.songs.meta.last_page > 1" class="flex items-center justify-center gap-1">
+        <nav
+            v-if="props.songs.meta.last_page > 1"
+            class="flex items-center justify-center gap-1"
+        >
             <template v-for="link in props.songs.links" :key="link.label">
                 <Link
                     v-if="link.url"

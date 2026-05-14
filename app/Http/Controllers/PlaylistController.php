@@ -1,69 +1,73 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePlaylistRequest;
+use App\Http\Requests\UpdatePlaylistRequest;
+use App\Http\Resources\SongResource;
 use App\Models\Playlist;
-use App\Models\User;
+use App\Models\Song;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
-// use Inertia\Response;
 class PlaylistController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request, User $user)
+    public function index(Request $request): Response
     {
         return Inertia::render('Playlists/Index', [
-            'Playlists' => $request->user()->playlists()->withCount('playlistSongs')->get(),
+            'playlists' => $request->user()
+                ->playlists()
+                ->withCount('playlistSongs')
+                ->orderByDesc('is_primary')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(User $user)
+    public function store(StorePlaylistRequest $request): RedirectResponse
+    {
+        $playlist = $request->user()->playlists()->create([
+            'name' => $request->validated('name'),
+            'is_primary' => false,
+        ]);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => "Created playlist \"{$playlist->name}\".",
+        ]);
+
+        return back();
+    }
+
+    public function show(Playlist $playlist): Response
+    {
+        $this->authorize('view', $playlist);
+
+        $songs = $playlist->songs()
+            ->with('uploader:id,name')
+            ->orderByPivot('added_at', 'desc')
+            ->paginate(20);
+
+        $songs->getCollection()->each(
+            fn (Song $song) => $song->setAttribute('is_in_my_library', true),
+        );
+
+        return Inertia::render('Playlists/Show', [
+            'playlist' => $playlist->only(['id', 'name', 'is_primary']),
+            'songs' => SongResource::collection($songs),
+        ]);
+    }
+
+    public function update(UpdatePlaylistRequest $request, Playlist $playlist): RedirectResponse
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request, User $user)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(User $user, Playlist $playlist)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(User $user, Playlist $playlist)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, User $user, Playlist $playlist)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user, Playlist $playlist)
+    public function destroy(Playlist $playlist): RedirectResponse
     {
         //
     }
