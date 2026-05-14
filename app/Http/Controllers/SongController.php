@@ -23,8 +23,13 @@ class SongController extends Controller
         $user = $request->user();
 
         $songs = Song::query()
-            ->with('uploader:id,name')
-            ->withExists(['Playlists as is_in_my_library' => fn ($q) => $q->where('user_id', $user->id)->where('is_primary', true),
+            ->with([
+                'uploader:id,name',
+                'playlists' => fn ($q) => $q->where('user_id', $user->id),
+            ])
+            ->withExists(['playlists as is_in_my_library' => fn ($q) => $q
+                ->where('user_id', $user->id)
+                ->where('is_primary', true),
             ])
             ->search($q)
             ->when($mineOnly, fn ($query) => $query->where('uploaded_by_user_id', $user->id))
@@ -35,6 +40,10 @@ class SongController extends Controller
         return Inertia::render('Songs/Index', [
             'songs' => SongResource::collection($songs),
             'filters' => ['q' => $q, 'mine' => $mineOnly],
+            'playlists' => $user->playlists()
+                ->orderByDesc('is_primary')
+                ->orderBy('name')
+                ->get(['id', 'name', 'is_primary']),
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Playlist;
 use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\User;
@@ -115,6 +116,48 @@ it('paginates results 20 per page', function (): void {
         ->has('songs.data', 20)
         ->where('songs.meta.total', 25)
         ->where('songs.meta.last_page', 2)
+    );
+});
+
+it('passes the users own playlists, primary first, ordered by name', function (): void {
+    $user = User::factory()->create();
+    Playlist::factory()->for($user)->create(['name' => 'Workout', 'is_primary' => false]);
+    Playlist::factory()->for($user)->create(['name' => 'Chill', 'is_primary' => false]);
+
+    // A stranger's playlist must not leak into the response.
+    $stranger = User::factory()->create();
+    Playlist::factory()->for($stranger)->create(['name' => 'Strangers Playlist']);
+
+    $response = $this->actingAs($user)->get('/songs');
+
+    $response->assertInertia(fn ($page) => $page
+        ->has('playlists', 3)
+        ->where('playlists.0.is_primary', true)
+        ->where('playlists.1.name', 'Chill')
+        ->where('playlists.2.name', 'Workout')
+    );
+});
+
+it('exposes my_playlist_ids reflecting which of the users playlists already hold each song', function (): void {
+    $user = User::factory()->create();
+    $song = Song::factory()->create();
+    $other = Song::factory()->create();
+
+    $primary = $user->primaryPlaylist;
+    $second = Playlist::factory()->for($user)->create();
+
+    PlaylistSong::factory()->create(['playlist_id' => $primary->id, 'song_id' => $song->id]);
+    PlaylistSong::factory()->create(['playlist_id' => $second->id, 'song_id' => $song->id]);
+
+    $response = $this->actingAs($user)->get('/songs');
+
+    $response->assertInertia(fn ($page) => $page
+        ->where(
+            'songs.data',
+            fn ($rows) => collect(collect($rows)->firstWhere('id', $song->id)['my_playlist_ids'])->sort()->values()->all()
+                === collect([$primary->id, $second->id])->sort()->values()->all()
+                && collect($rows)->firstWhere('id', $other->id)['my_playlist_ids'] === [],
+        )
     );
 });
 

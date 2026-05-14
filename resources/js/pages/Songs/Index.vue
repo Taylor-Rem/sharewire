@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, Link, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
-import { Check, Disc3, Plus, Trash2 } from 'lucide-vue-next';
+import { Check, ChevronDown, Disc3, Plus, Trash2 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import PlaylistSongController from '@/actions/App/Http/Controllers/PlaylistSongController';
 import SongController from '@/actions/App/Http/Controllers/SongController';
@@ -19,6 +19,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { index as songsIndexRoute } from '@/routes/songs';
@@ -40,7 +48,14 @@ type SongRow = {
     is_in_my_library: boolean;
     is_uploader: boolean;
     audio_url: string;
+    my_playlist_ids: number[];
     created_at: string | null;
+};
+
+type Playlist = {
+    id: number;
+    name: string;
+    is_primary: boolean;
 };
 
 type PaginationLink = {
@@ -64,6 +79,7 @@ type Paginator<T> = {
 type Props = {
     songs: Paginator<SongRow>;
     filters: { q: string; mine: boolean };
+    playlists: Playlist[];
 };
 
 const props = defineProps<Props>();
@@ -99,6 +115,14 @@ const submitSearch = useDebounceFn((value: string): void => {
 
 watch(q, (value) => submitSearch(value));
 watch(mineOnly, (value) => visit({ q: q.value, mine: value }));
+
+const addToPlaylist = (song: SongRow, playlist: Playlist): void => {
+    router.post(
+        PlaylistSongController.store.url({ song: song.id }),
+        { playlist_id: playlist.id },
+        { preserveScroll: true, preserveState: true },
+    );
+};
 
 const formatDuration = (seconds: number | null): string => {
     if (seconds === null || seconds <= 0) return '—';
@@ -186,32 +210,41 @@ const formatDuration = (seconds: number | null): string => {
                         <td class="px-4 py-3 text-muted-foreground">{{ song.uploader.name ?? '—' }}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <Button
-                                    v-if="song.is_in_my_library"
-                                    variant="outline"
-                                    size="sm"
-                                    disabled
-                                >
-                                    <Check class="size-4" />
-                                    In library
-                                </Button>
-                                <Form
-                                    v-else
-                                    v-bind="PlaylistSongController.store.form({ song: song.id })"
-                                    :options="{ preserveScroll: true }"
-                                    #default="{ processing }"
-                                >
-                                    <Button
-                                        type="submit"
-                                        size="sm"
-                                        variant="default"
-                                        :disabled="processing"
-                                        :data-test="`add-song-${song.id}`"
-                                    >
-                                        <Plus class="size-4" />
-                                        Add
-                                    </Button>
-                                </Form>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger as-child>
+                                        <Button
+                                            size="sm"
+                                            :variant="song.my_playlist_ids.length > 0 ? 'outline' : 'default'"
+                                            :data-test="`add-song-${song.id}`"
+                                        >
+                                            <Check v-if="song.my_playlist_ids.length > 0" class="size-4" />
+                                            <Plus v-else class="size-4" />
+                                            {{ song.my_playlist_ids.length > 0 ? 'In playlist' : 'Add' }}
+                                            <ChevronDown class="size-4 opacity-60" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" class="w-56">
+                                        <DropdownMenuLabel>Add to playlist</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            v-for="playlist in props.playlists"
+                                            :key="playlist.id"
+                                            @select="addToPlaylist(song, playlist)"
+                                            :data-test="`add-song-${song.id}-to-playlist-${playlist.id}`"
+                                        >
+                                            <Check
+                                                v-if="song.my_playlist_ids.includes(playlist.id)"
+                                                class="size-4"
+                                            />
+                                            <span v-else class="size-4" />
+                                            <span>{{ playlist.name }}</span>
+                                            <span
+                                                v-if="playlist.is_primary"
+                                                class="ml-auto text-xs text-muted-foreground"
+                                            >Primary</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
 
                                 <Dialog v-if="song.is_uploader">
                                     <DialogTrigger as-child>
