@@ -10,7 +10,7 @@ The feature set is intentionally small (auth, upload, browse, search, add, play,
 
 - **Skinny controllers** (every method ≤ 15 lines), **Form Requests** with populated `rules()` and `authorize()`, **Actions** for every business operation, **Resources** for every JSON shape, **Policies** for every authorization decision.
 - **Eloquent first** — zero `DB::raw` or `DB::table` in `app/`. Search is a `where` chain across four columns.
-- **Pest** end-to-end: 120 tests, 419 assertions, ~2 seconds. Every controller endpoint has happy-path, unauthorized, and validation-failure coverage; every Action and Policy has a direct test.
+- **Pest** end-to-end: 110 tests, 445 assertions, under 3 seconds (measured 2026-11-13). Every controller endpoint has happy-path, unauthorized, and validation-failure coverage; every Action and Policy has a direct test.
 - **Queued job** (`ProcessUploadedSong`) for audio-metadata extraction. The upload controller dispatches and redirects immediately; a systemd worker on the laptop fills in `duration_seconds` once `getID3` has parsed the file.
 - **Inertia v3 + Vue 3 Composition API** with Wayfinder-generated typed routes — no hand-written URL strings in any `<Link>` or `<Form>`.
 - **Module-level singleton composable** drives the global audio player so it survives Inertia page navigations. Pinia is intentionally not used.
